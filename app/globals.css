@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Activa el modo oscuro por clase (.dark en <html>) en vez de por preferencia
+   del sistema operativo, para que el interruptor "Tema" del panel controle
+   tanto las clases dark: de Tailwind como las variables CSS de abajo. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --bg-page: #F2F1EE;
