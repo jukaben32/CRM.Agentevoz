@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import { getAppDatabaseUrl } from "@/lib/env";
+import { getAppDatabaseUrl, toPgConnectionOptions } from "@/lib/env";
 import * as schema from "./schema";
 
 const { Pool } = pg;
@@ -11,18 +11,14 @@ declare global {
 }
 
 function createPool() {
-  const connectionString = getAppDatabaseUrl();
-  const isCloud = connectionString.includes("supabase.co") ||
-    connectionString.includes("pooler.supabase.com") ||
-    connectionString.includes("neon.tech") ||
-    connectionString.includes("sslmode=require");
+  const { connectionString, ssl } = toPgConnectionOptions(getAppDatabaseUrl());
 
   return new Pool({
     connectionString,
     max: process.env.NODE_ENV === "production" ? 10 : 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
-    ssl: isCloud ? { rejectUnauthorized: false } : undefined,
+    ssl,
   });
 }
 

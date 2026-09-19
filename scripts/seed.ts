@@ -1,14 +1,12 @@
 import bcrypt from "bcryptjs";
 import pg from "pg";
-import { getAdminDatabaseUrl } from "../lib/env";
+import { getAdminDatabaseUrl, toPgConnectionOptions } from "../lib/env";
 
 const { Client } = pg;
 
 async function seed() {
   console.log("🌱 Iniciando semillero de datos (pnpm db:seed)...");
-  const client = new Client({
-    connectionString: getAdminDatabaseUrl(),
-  });
+  const client = new Client(toPgConnectionOptions(getAdminDatabaseUrl()));
 
   await client.connect();
 

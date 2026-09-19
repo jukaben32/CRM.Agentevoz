@@ -1,15 +1,13 @@
 import pg from "pg";
 import fs from "fs";
 import path from "path";
-import { getAdminDatabaseUrl } from "../lib/env";
+import { getAdminDatabaseUrl, toPgConnectionOptions } from "../lib/env";
 
 const { Client } = pg;
 
 async function runMigrations() {
   console.log("🚀 Iniciando migrador de base de datos PostgreSQL 18...");
-  const client = new Client({
-    connectionString: getAdminDatabaseUrl(),
-  });
+  const client = new Client(toPgConnectionOptions(getAdminDatabaseUrl()));
 
   await client.connect();
 

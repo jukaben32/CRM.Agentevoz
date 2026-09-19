@@ -83,3 +83,32 @@ export function getAdminDatabaseUrl(): string {
   const db = process.env.POSTGRES_DB || "voiceops";
   return `postgres://${user}:${pass}@${host}:${port}/${db}`;
 }
+
+/**
+ * Construye las opciones de conexión `pg` (connectionString + ssl) para un host en la nube
+ * (Supabase, Neon, etc.).
+ *
+ * node-postgres da prioridad al parámetro `sslmode` de la URL sobre la opción `ssl` explícita
+ * (desde pg 8.x, `sslmode=require` se trata como `verify-full` y valida el certificado contra
+ * las CA del sistema). Los certificados de Supabase/Neon no siempre validan así, así que
+ * quitamos `sslmode` de la URL y controlamos el SSL exclusivamente con la opción `ssl`.
+ */
+export function toPgConnectionOptions(connectionString: string): {
+  connectionString: string;
+  ssl?: { rejectUnauthorized: boolean };
+} {
+  const isCloud = connectionString.includes("supabase.co") ||
+    connectionString.includes("pooler.supabase.com") ||
+    connectionString.includes("neon.tech") ||
+    connectionString.includes("sslmode=require");
+
+  if (!isCloud) {
+    return { connectionString };
+  }
+
+  const sanitized = connectionString
+    .replace(/([?&])sslmode=[^&]*&?/, "$1")
+    .replace(/[?&]$/, "");
+
+  return { connectionString: sanitized, ssl: { rejectUnauthorized: false } };
+}
