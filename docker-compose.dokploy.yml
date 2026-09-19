@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://app_user:app_password@db:5432/crm_agente_db
+      - DATABASE_DIRECT_URL=postgresql://postgres:postgres_password@db:5432/crm_agente_db
+      - APP_URL=${APP_URL:-https://crm.tudominio.com}
+      - VAPI_API_KEY=${VAPI_API_KEY}
+      - VAPI_WEBHOOK_SECRET=${VAPI_WEBHOOK_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.crm-app.rule=Host(`${APP_DOMAIN:-crm.tudominio.com}`)"
+      - "traefik.http.routers.crm-app.entrypoints=websecure"
+      - "traefik.http.routers.crm-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.crm-app.loadbalancer.server.port=3000"
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: crm_agente_db
+      APP_USER_PASSWORD: app_password
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./db/init/00-roles.sql:/docker-entrypoint-initdb.d/00-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d crm_agente_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  dokploy-network:
+    external: true
+  internal:
+    driver: bridge

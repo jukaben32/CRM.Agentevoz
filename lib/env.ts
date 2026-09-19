@@ -1,0 +1,76 @@
+import { z } from "zod";
+
+try {
+  if (typeof process.loadEnvFile === "function") {
+    process.loadEnvFile();
+  }
+} catch {
+  // Ignorar si el archivo .env no existe en tiempo de compilación
+}
+
+const envSchema = z.object({
+  POSTGRES_USER: z.string().default("voiceops"),
+  POSTGRES_PASSWORD: z.string().default("voiceops_dev_pass"),
+  POSTGRES_DB: z.string().default("voiceops"),
+  DB_HOST: z.string().default("localhost"),
+  DB_PORT: z.string().default("5432"),
+
+  APP_DB_USER: z.string().default("app_user"),
+  APP_DB_PASSWORD: z.string().default("app_user_dev_pass"),
+
+  APP_URL: z.string().url().default("http://localhost:3000"),
+  APP_DOMAIN: z.string().optional(),
+
+  VAPI_API_KEY: z.string().optional(),
+  VAPI_SERVER_CREDENTIAL_ID: z.string().optional(),
+  VAPI_WEBHOOK_TOKEN: z.string().optional(),
+  VAPI_WEBHOOK_SECRET: z.string().optional(),
+
+  DEFAULT_TIMEZONE: z.string().default("Europe/Madrid"),
+  DEFAULT_COUNTRY_CODE: z.string().default("ES"),
+
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+});
+
+export const env = envSchema.parse({
+  POSTGRES_USER: process.env.POSTGRES_USER,
+  POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
+  POSTGRES_DB: process.env.POSTGRES_DB,
+  DB_HOST: process.env.DB_HOST,
+  DB_PORT: process.env.DB_PORT,
+  APP_DB_USER: process.env.APP_DB_USER,
+  APP_DB_PASSWORD: process.env.APP_DB_PASSWORD,
+  APP_URL: process.env.APP_URL,
+  APP_DOMAIN: process.env.APP_DOMAIN,
+  VAPI_API_KEY: process.env.VAPI_API_KEY,
+  VAPI_SERVER_CREDENTIAL_ID: process.env.VAPI_SERVER_CREDENTIAL_ID,
+  VAPI_WEBHOOK_TOKEN: process.env.VAPI_WEBHOOK_TOKEN || process.env.VAPI_WEBHOOK_SECRET,
+  VAPI_WEBHOOK_SECRET: process.env.VAPI_WEBHOOK_SECRET || process.env.VAPI_WEBHOOK_TOKEN,
+  DEFAULT_TIMEZONE: process.env.DEFAULT_TIMEZONE,
+  DEFAULT_COUNTRY_CODE: process.env.DEFAULT_COUNTRY_CODE,
+  NODE_ENV: process.env.NODE_ENV,
+});
+
+/**
+ * Obtiene la cadena de conexión a Postgres para el rol de aplicación app_user (RLS forzado)
+ */
+export function getAppDatabaseUrl(): string {
+  const host = process.env.DB_HOST || "localhost";
+  const port = process.env.DB_PORT || "5432";
+  const user = process.env.APP_DB_USER || "app_user";
+  const pass = encodeURIComponent(process.env.APP_DB_PASSWORD || "app_user_dev_pass");
+  const db = process.env.POSTGRES_DB || "voiceops";
+  return `postgres://${user}:${pass}@${host}:${port}/${db}`;
+}
+
+/**
+ * Obtiene la cadena de conexión para migraciones y semillero (rol propietario)
+ */
+export function getAdminDatabaseUrl(): string {
+  const host = process.env.DB_HOST || "localhost";
+  const port = process.env.DB_PORT || "5432";
+  const user = process.env.POSTGRES_USER || "voiceops";
+  const pass = encodeURIComponent(process.env.POSTGRES_PASSWORD || "voiceops_dev_pass");
+  const db = process.env.POSTGRES_DB || "voiceops";
+  return `postgres://${user}:${pass}@${host}:${port}/${db}`;
+}

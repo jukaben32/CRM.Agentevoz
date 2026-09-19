@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: voiceops_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-voiceops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-voiceops_dev_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-voiceops}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./db/init/00-roles.sql:/docker-entrypoint-initdb.d/00-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-voiceops} -d ${POSTGRES_DB:-voiceops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:5
+    container_name: voiceops_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: voiceops_pgdata

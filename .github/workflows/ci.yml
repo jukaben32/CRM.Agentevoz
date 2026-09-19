@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    name: Lint, Types, Tests & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Verify CLAUDE.md and AGENTS.md exact match
+        run: |
+          cmp --silent CLAUDE.md AGENTS.md || (echo "ERROR: CLAUDE.md y AGENTS.md deben ser idénticos byte a byte" && exit 1)
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Lint
+        run: pnpm lint
+
+      - name: Run Type Check
+        run: pnpm exec tsc --noEmit
+
+      - name: Run Tests
+        run: pnpm test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://app_user:app_password@localhost:5432/crm_agente_db
+          DATABASE_DIRECT_URL: postgresql://postgres:postgres_password@localhost:5432/crm_agente_db
+          APP_URL: http://localhost:3000
+          VAPI_API_KEY: test_key
+          VAPI_WEBHOOK_SECRET: test_secret
+
+      - name: Build Next.js
+        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://app_user:app_password@localhost:5432/crm_agente_db
+          DATABASE_DIRECT_URL: postgresql://postgres:postgres_password@localhost:5432/crm_agente_db
+          APP_URL: http://localhost:3000
+          VAPI_API_KEY: test_key
+          VAPI_WEBHOOK_SECRET: test_secret
