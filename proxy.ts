@@ -19,11 +19,6 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico");
 
-  // Si el usuario ya está autenticado e intenta ir a login/signup, redirigir al panel principal
-  if (sessionCookie && (pathname === "/login" || pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   // Si la ruta no es pública y falta la cookie de sesión
   if (!isPublicRoute && !sessionCookie) {
     if (pathname.startsWith("/api/")) {

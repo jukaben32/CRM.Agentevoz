@@ -52,9 +52,12 @@ export const env = envSchema.parse({
 });
 
 /**
- * Obtiene la cadena de conexión a Postgres para el rol de aplicación app_user (RLS forzado)
+ * Obtiene la cadena de conexión a Postgres para el rol de aplicación (con o sin SSL / Supabase)
  */
 export function getAppDatabaseUrl(): string {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
   const host = process.env.DB_HOST || "localhost";
   const port = process.env.DB_PORT || "5432";
   const user = process.env.APP_DB_USER || "app_user";
@@ -64,9 +67,15 @@ export function getAppDatabaseUrl(): string {
 }
 
 /**
- * Obtiene la cadena de conexión para migraciones y semillero (rol propietario)
+ * Obtiene la cadena de conexión directa para migraciones y operaciones de administración
  */
 export function getAdminDatabaseUrl(): string {
+  if (process.env.DATABASE_DIRECT_URL) {
+    return process.env.DATABASE_DIRECT_URL;
+  }
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
   const host = process.env.DB_HOST || "localhost";
   const port = process.env.DB_PORT || "5432";
   const user = process.env.POSTGRES_USER || "voiceops";

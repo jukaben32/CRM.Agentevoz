@@ -23,10 +23,10 @@ export async function POST(req: NextRequest) {
     const rateKey = `${ip}_${normalizedEmail}`;
     const now = Date.now();
 
-    // Comprobar rate limit (máx 6 intentos por cada 5 minutos)
+    // Comprobar rate limit (máx 20 intentos por cada 5 minutos)
     const attempt = loginAttempts.get(rateKey);
     if (attempt && attempt.resetAt > now) {
-      if (attempt.count >= 6) {
+      if (attempt.count >= 20) {
         return NextResponse.json(
           { error: "Demasiados intentos fallidos. Por favor, espera 5 minutos." },
           { status: 429 }
@@ -62,11 +62,20 @@ export async function POST(req: NextRequest) {
     // Limpiar intentos tras éxito
     loginAttempts.delete(rateKey);
 
-    // Crear sesión
+    // Crear sesión en base de datos y adjuntar cookie en respuesta
     const userAgent = req.headers.get("user-agent");
-    await createSession(user.id, userAgent, ip);
+    const token = await createSession(user.id, userAgent, ip);
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("voiceops_session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    return response;
   } catch (err: any) {
     console.error("Error en login:", err);
     return NextResponse.json(

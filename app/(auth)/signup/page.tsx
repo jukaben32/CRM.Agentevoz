@@ -31,8 +31,7 @@ export default function SignupPage() {
         throw new Error(data.error || "No se pudo completar el registro.");
       }
 
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message);
     } finally {

@@ -148,9 +148,18 @@ Tu único objetivo es resolver la llamada: informar o cerrar una cita.
       // Iniciar sesión automáticamente
       const userAgent = req.headers.get("user-agent");
       const ip = req.headers.get("x-forwarded-for") || "unknown";
-      await createSession(userId, userAgent, ip);
+      const token = await createSession(userId, userAgent, ip);
 
-      return NextResponse.json({ success: true });
+      const response = NextResponse.json({ success: true });
+      response.cookies.set("voiceops_session", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60,
+      });
+
+      return response;
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
