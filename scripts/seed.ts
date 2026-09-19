@@ -100,7 +100,7 @@ Página web: https://agentetaller.es
        ) VALUES (
          $1, $2, $3, $4,
          '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_turbo_v2_5', 'es', 'es',
-         '{"provider":"openai","model":"gpt-5.6-luna"}'::jsonb,
+         '{"provider":"openai","model":"gpt-4.1-mini"}'::jsonb,
          '{"provider":"deepgram","model":"nova-3-general","language":"es"}'::jsonb,
          '+34600112233', 'Te paso con un mecánico del taller un segundo.',
          2, 60, 14

@@ -28,11 +28,13 @@ export default async function PerfilPage() {
   });
 
   return (
-    <ProfileView
-      user={profileData.user}
-      activeSessions={profileData.activeSessions}
-      business={business}
-      role={session.role}
-    />
+    <div className="p-8 max-w-7xl mx-auto w-full">
+      <ProfileView
+        user={profileData.user}
+        activeSessions={profileData.activeSessions}
+        business={business}
+        role={session.role}
+      />
+    </div>
   );
 }

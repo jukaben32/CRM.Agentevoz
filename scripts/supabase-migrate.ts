@@ -127,7 +127,7 @@ async function main() {
           'Agente Taller, buenas. ¿En qué te puedo ayudar hoy?',
           'cercano y resolutivo',
           '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_turbo_v2_5', 'es', 'es',
-          '{"provider":"openai","model":"gpt-5.6-luna"}'::jsonb,
+          '{"provider":"openai","model":"gpt-4.1-mini"}'::jsonb,
           '{"provider":"deepgram","model":"nova-3-general","language":"es"}'::jsonb,
           'Te paso con un mecánico de taller.', 1, 60, 14
         );

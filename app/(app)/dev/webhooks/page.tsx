@@ -36,5 +36,9 @@ export default async function DevWebhooksPage() {
     client.release();
   }
 
-  return <WebhookInspector events={events} />;
+  return (
+    <div className="p-8 max-w-7xl mx-auto w-full">
+      <WebhookInspector events={events} />
+    </div>
+  );
 }

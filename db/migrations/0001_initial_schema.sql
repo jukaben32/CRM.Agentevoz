@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS voice_agents (
   voice_model text DEFAULT 'eleven_turbo_v2_5',
   voice_language text DEFAULT 'es',
   language text NOT NULL DEFAULT 'es',
-  model jsonb NOT NULL DEFAULT '{"provider":"openai","model":"gpt-5.6-luna"}'::jsonb,
+  model jsonb NOT NULL DEFAULT '{"provider":"openai","model":"gpt-4.1-mini"}'::jsonb,
   transcriber jsonb NOT NULL DEFAULT '{"provider":"deepgram","model":"nova-3-general","language":"es"}'::jsonb,
   handoff_number text,
   handoff_message text NOT NULL DEFAULT 'Te transfiero con un compañero del taller para que te ayude.',

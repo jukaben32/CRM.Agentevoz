@@ -102,11 +102,11 @@ export function formatRole(role: string): string {
 export function roleBadgeClasses(role: string): string {
   switch (role) {
     case "owner":
-      return "bg-[#E8490C]/10 text-[#E8490C] border border-[#E8490C]/20";
+      return "bg-orange-500/10 text-orange-600 dark:text-orange-500 border border-orange-500/20";
     case "staff":
-      return "bg-zinc-100 text-zinc-700 border border-zinc-200";
+      return "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700";
     default:
-      return "bg-zinc-100 text-zinc-700 border border-zinc-200";
+      return "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700";
   }
 }
 

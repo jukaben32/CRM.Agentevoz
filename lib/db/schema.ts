@@ -79,7 +79,7 @@ export const voiceAgents = pgTable("voice_agents", {
   voiceModel: text("voice_model").default("eleven_turbo_v2_5"),
   voiceLanguage: text("voice_language").default("es"),
   language: text("language").notNull().default("es"),
-  model: jsonb("model").notNull().default({ provider: "openai", model: "gpt-5.6-luna" }),
+  model: jsonb("model").notNull().default({ provider: "openai", model: "gpt-4.1-mini" }),
   transcriber: jsonb("transcriber").notNull().default({ provider: "deepgram", model: "nova-3-general", language: "es" }),
   handoffNumber: text("handoff_number"),
   handoffMessage: text("handoff_message").notNull().default("Te transfiero con un compañero del taller para que te ayude."),

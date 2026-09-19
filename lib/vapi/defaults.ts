@@ -16,7 +16,7 @@ export const DEFAULT_VAPI_CONFIG = {
   },
   model: {
     provider: "openai",
-    model: "gpt-5.6-luna",
+    model: "gpt-4.1-mini",
   },
   voice: {
     provider: "11labs",

@@ -78,7 +78,7 @@ export function AgentSettingsView({
 
   // 3. Modelos del Agente
   const initialTranscriber = (agent.transcriber as any) || { provider: "deepgram", model: "nova-3-general", language: "es" };
-  const initialModel = (agent.model as any) || { provider: "openai", model: "gpt-5.6-luna" };
+  const initialModel = (agent.model as any) || { provider: "openai", model: "gpt-4.1-mini" };
   const initialVoice = {
     provider: agent.voiceProvider || "11labs",
     voiceId: agent.voiceId || "UOIqAnmS11Reiei1Ytkc",
@@ -91,7 +91,7 @@ export function AgentSettingsView({
   const [sttLang, setSttLang] = useState(initialTranscriber.language || "es");
 
   const [llmProvider, setLlmProvider] = useState(initialModel.provider || "openai");
-  const [llmModel, setLlmModel] = useState(initialModel.model || "gpt-5.6-luna");
+  const [llmModel, setLlmModel] = useState(initialModel.model || "gpt-4.1-mini");
 
   const [ttsProvider, setTtsProvider] = useState(initialVoice.provider || "11labs");
   const [ttsVoiceId, setTtsVoiceId] = useState(initialVoice.voiceId || "UOIqAnmS11Reiei1Ytkc");
@@ -615,7 +615,7 @@ export function AgentSettingsView({
                   options={currentLlmDef.models.map((m) => ({
                     value: m,
                     label: m,
-                    isRecommended: m === "gpt-5.6-luna",
+                    isRecommended: m === "gpt-4.1-mini",
                   }))}
                 />
               ) : (

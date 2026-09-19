@@ -281,7 +281,7 @@ export async function publishAgentToVapi() {
 
     const modelPayload: any = {
       provider: (agent.model as any)?.provider || "openai",
-      model: (agent.model as any)?.model || "gpt-5.6-luna",
+      model: (agent.model as any)?.model || "gpt-4.1-mini",
       toolIds,
       messages: [{ role: "system", content: effectivePrompt }],
     };

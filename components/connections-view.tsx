@@ -70,15 +70,15 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
         <div
           className={`p-4 rounded-2xl text-xs flex items-center justify-between border ${
             feedback.type === "success"
-              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-              : "bg-rose-50 text-rose-800 border-rose-200"
+              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+              : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800"
           }`}
         >
           <div className="flex items-center gap-2">
             {feedback.type === "success" ? <CheckCircle size={18} /> : <WarningCircle size={18} />}
             <span className="font-medium">{feedback.message}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-stone-400 hover:text-stone-600">
+          <button onClick={() => setFeedback(null)} className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer">
             ×
           </button>
         </div>
@@ -161,8 +161,8 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
                     agent?.vapiAssistantId
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
                   }`}
                 >
                   {agent?.vapiAssistantId ? "Provisionado en VAPI" : "Pendiente de creación"}
@@ -213,8 +213,8 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
                     agent?.vapiPhoneNumberId
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
                   }`}
                 >
                   {agent?.vapiPhoneNumberId ? "Número Vinculado" : "Sin número asociado"}

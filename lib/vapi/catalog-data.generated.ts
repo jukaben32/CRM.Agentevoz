@@ -134,7 +134,7 @@ export const VAPI_GENERATED_CATALOG: VapiCatalogData = {
       "provider": "openai",
       "name": "OpenAI",
       "models": [
-        "gpt-5.6-luna",
+        "gpt-4.1-mini",
         "gpt-4o",
         "gpt-4o-mini",
         "gpt-4.1",

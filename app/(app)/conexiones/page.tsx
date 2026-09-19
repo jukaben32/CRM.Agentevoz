@@ -25,10 +25,12 @@ export default async function ConexionesPage() {
   });
 
   return (
-    <ConnectionsView
-      agent={agent}
-      tools={tools}
-      appUrl={env.APP_URL}
-    />
+    <div className="p-8 max-w-7xl mx-auto w-full">
+      <ConnectionsView
+        agent={agent}
+        tools={tools}
+        appUrl={env.APP_URL}
+      />
+    </div>
   );
 }
