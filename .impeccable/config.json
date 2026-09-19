@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/webhook-inspector.tsx"
+        ],
+        "createdAt": "2026-09-19T15:56:21.475Z",
+        "reason": "Barra de acento naranja para fila seleccionada en lista maestro-detalle; replica el mismo lenguaje de .nav-active-indicator ya usado en components/sidebar.tsx (indicador de estado activo/seleccionado), preexistente en el codigo, no introducido en esta sesion; pagina interna de dev tools"
+      }
+    ]
+  }
+}
