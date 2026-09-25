@@ -61,6 +61,12 @@
       "skillPath": "simulations/SKILL.md",
       "computedHash": "0457488c4aff9d96dfe7086582cc1c19514edb8952c4ba5cf6f1b8f5d2196d48"
     },
+    "vapi-bootstrap-framework": {
+      "source": "VapiAI/skills",
+      "sourceType": "github",
+      "skillPath": "vapi-bootstrap-framework/SKILL.md",
+      "computedHash": "54fa074aad166c92acd9cebfb86ddf63899037e0aa0095ff272298e83fdad5dd"
+    },
     "vapi-prompt-builder": {
       "source": "VapiAI/skills",
       "sourceType": "github",
