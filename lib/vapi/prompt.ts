@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { Business, VoiceAgent, BusinessHour, Service, BusinessFact } from "@/lib/db/schema";
 
 export const NICHO_CONFIG = {
@@ -6,6 +5,14 @@ export const NICHO_CONFIG = {
   tipoNegocio: "taller mecánico",
   datosExtra: "matrícula y marca y modelo del vehículo",
 };
+
+/**
+ * Formatea centavos como pesos dominicanos (RD$1,234.00)
+ */
+export function formatPesos(priceCents: number): string {
+  const pesos = priceCents / 100;
+  return `RD$${pesos.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 /**
  * Compone el system prompt completo y exacto según la plantilla §10.3
@@ -18,15 +25,19 @@ export function composeSystemPrompt(data: {
   facts: BusinessFact[];
 }): string {
   const { business, agent, hours, services, facts } = data;
-  const timezone = business.timezone || "Europe/Madrid";
-  const now = DateTime.now().setZone(timezone);
+  const timezone = business.timezone || "America/Santo_Domingo";
 
-  const fechaHoy = now.setLocale("es").toFormat("cccc, d 'de' LLLL 'de' yyyy");
-  const horaAhora = now.toFormat("HH:mm");
+  // La fecha y hora NO se calculan aquí (el prompt se genera una sola vez, al
+  // provisionar el asistente, y se reutiliza en todas las llamadas futuras).
+  // Se dejan como variables Liquid que VAPI resuelve en el momento real de
+  // cada llamada, para que el agente nunca "crea" que sigue siendo el día
+  // en que se generó el prompt.
+  const fechaHoyVar = `{{"now" | date: "%A, %d de %B de %Y", "${timezone}"}}`;
+  const horaAhoraVar = `{{"now" | date: "%H:%M", "${timezone}"}}`;
 
   // Formatear dirección y ciudad
   const direccion = business.address || "No especificada";
-  let ciudad = "España";
+  let ciudad = "República Dominicana";
   if (business.address) {
     const parts = business.address.split(",");
     ciudad = parts[parts.length - 1].trim();
@@ -61,7 +72,7 @@ export function composeSystemPrompt(data: {
           .map(
             (s) =>
               `- ${s.name}: ${s.durationMinutes} minutos${
-                s.priceCents ? ` (aprox. ${(s.priceCents / 100).toFixed(2)} €)` : ""
+                s.priceCents ? ` (aprox. ${formatPesos(s.priceCents)})` : ""
               }${s.description ? ` - ${s.description}` : ""}`
           )
           .join("\n")
@@ -82,16 +93,16 @@ Coges el teléfono cuando el equipo está trabajando y no puede atenderlo.
 Tu único objetivo es resolver la llamada: informar o cerrar una cita.
 
 # Cómo hablas
-- Español de España. Tono: ${tono}. Cercano y resolutivo, nunca ceremonioso.
+- Español dominicano. Tono: ${tono}. Cercano y resolutivo, nunca ceremonioso.
 - Una o dos frases por turno. Jamás sueltes un párrafo.
 - Una sola pregunta cada vez, y espera la respuesta antes de seguir.
 - Hablas, no escribes. Nada de listas, viñetas, guiones ni símbolos.
-- Di las cosas como se dicen: "el jueves catorce a las diez y media", "cuarenta y cinco euros", "una hora y media". Las matrículas, letra por letra.
+- Di las cosas como se dicen: "el jueves catorce a las diez y media", "dos mil quinientos pesos", "una hora y media". Las matrículas, letra por letra.
 - Si te interrumpen, para de hablar y escucha.
 - Si no entiendes algo, pide que te lo repitan. No adivines.
 
 # Lo que sabes
-Hoy es ${fechaHoy} y son las ${horaAhora} en ${timezone}.
+Hoy es ${fechaHoyVar} y son las ${horaAhoraVar} en ${timezone}.
 Dirección: ${direccion}
 ${datosContacto}
 Horario:

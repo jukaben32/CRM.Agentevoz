@@ -1,7 +1,7 @@
 /**
  * Script CLI: pnpm vapi:sync
- * Re-alinea el server.url y server.secret de todos los asistentes y tools compartidas
- * registrados en la cuenta de VAPI con el APP_URL actual.
+ * Re-alinea el server.url y server.credentialId de todos los asistentes y tools
+ * compartidas registrados en la cuenta de VAPI con el APP_URL actual.
  */
 import { pool } from "../lib/db";
 import { env } from "../lib/env";
@@ -9,11 +9,24 @@ import { env } from "../lib/env";
 async function main() {
   console.log("=== Sincronización Global de URLs VAPI ===");
   const targetWebhookUrl = `${env.APP_URL}/api/vapi/webhook`;
-  const webhookSecret = env.VAPI_WEBHOOK_SECRET || env.VAPI_WEBHOOK_TOKEN;
   console.log(`URL Webhook Destino: ${targetWebhookUrl}\n`);
 
   if (!env.VAPI_API_KEY) {
     console.error("ERROR: VAPI_API_KEY no está configurada en .env");
+    process.exit(1);
+  }
+
+  // IMPORTANTE: el webhook (app/api/vapi/webhook/route.ts) valida un header
+  // "Authorization: Bearer <token>", que VAPI solo envía cuando el asistente/tool
+  // tiene server.credentialId apuntando a una Custom Credential tipo Bearer Token
+  // en VAPI (no basta con server.secret: eso manda X-Vapi-Secret, que el
+  // webhook no comprueba). Sin esto, cada tool-call real fallará con 401.
+  if (!env.VAPI_SERVER_CREDENTIAL_ID) {
+    console.error(
+      "ERROR: VAPI_SERVER_CREDENTIAL_ID no está configurada. Crea la Custom Credential " +
+        "(Bearer Token, mismo valor que VAPI_WEBHOOK_TOKEN) en el dashboard de VAPI y pon " +
+        "su ID en esta variable antes de sincronizar."
+    );
     process.exit(1);
   }
 
@@ -38,7 +51,7 @@ async function main() {
           body: JSON.stringify({
             server: {
               url: targetWebhookUrl,
-              secret: webhookSecret,
+              credentialId: env.VAPI_SERVER_CREDENTIAL_ID,
               timeoutSeconds: 20,
             },
           }),
@@ -76,7 +89,7 @@ async function main() {
             body: JSON.stringify({
               server: {
                 url: targetWebhookUrl,
-                secret: webhookSecret,
+                credentialId: env.VAPI_SERVER_CREDENTIAL_ID,
                 timeoutSeconds: 20,
               },
             }),

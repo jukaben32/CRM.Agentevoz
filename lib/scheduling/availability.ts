@@ -80,7 +80,7 @@ export async function getAvailableSlots(
     .where(eq(voiceAgents.businessId, businessId))
     .limit(1);
 
-  const timezone = business?.timezone || "Europe/Madrid";
+  const timezone = business?.timezone || "America/Santo_Domingo";
   const slotCapacity = agent?.slotCapacity || 1;
   const minNoticeMinutes = agent?.minNoticeMinutes || 60;
   const bookingHorizonDays = Math.min(params.daysAhead || agent?.bookingHorizonDays || 14, 30);

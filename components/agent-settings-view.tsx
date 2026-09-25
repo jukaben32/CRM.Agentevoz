@@ -58,7 +58,7 @@ export function AgentSettingsView({
 
   // 1. Información del Negocio
   const [name, setName] = useState(business.name || "");
-  const [timezone, setTimezone] = useState(business.timezone || "Europe/Madrid");
+  const [timezone, setTimezone] = useState(business.timezone || "America/Santo_Domingo");
   const [phone, setPhone] = useState(business.phone || "");
   const [email, setEmail] = useState(business.email || "");
   const [website, setWebsite] = useState(business.website || "");
@@ -308,13 +308,15 @@ export function AgentSettingsView({
                 value={timezone}
                 onChange={setTimezone}
                 options={[
-                  { value: "Europe/Madrid", label: "Europe/Madrid (Península y Baleares)", isRecommended: true },
-                  { value: "Atlantic/Canary", label: "Atlantic/Canary (Islas Canarias)", isRecommended: true },
-                  { value: "Europe/Lisbon", label: "Europe/Lisbon (Portugal)" },
-                  { value: "Europe/London", label: "Europe/London (UK)" },
+                  { value: "America/Santo_Domingo", label: "America/Santo_Domingo (República Dominicana)", isRecommended: true },
+                  { value: "America/New_York", label: "America/New_York (EE. UU. Este)" },
                   { value: "America/Mexico_City", label: "America/Mexico_City" },
                   { value: "America/Bogota", label: "America/Bogota" },
                   { value: "America/Argentina/Buenos_Aires", label: "America/Buenos_Aires" },
+                  { value: "Europe/Madrid", label: "Europe/Madrid (Península y Baleares)" },
+                  { value: "Atlantic/Canary", label: "Atlantic/Canary (Islas Canarias)" },
+                  { value: "Europe/Lisbon", label: "Europe/Lisbon (Portugal)" },
+                  { value: "Europe/London", label: "Europe/London (UK)" },
                 ]}
               />
             </div>
@@ -783,7 +785,7 @@ export function AgentSettingsView({
                 <div>
                   <div className="font-semibold text-stone-900 dark:text-stone-100">{s.name}</div>
                   <div className="text-stone-500 text-[11px]">
-                    {s.durationMinutes} min • {s.priceCents ? `${(s.priceCents / 100).toFixed(2)} €` : "Precio a consultar"}
+                    {s.durationMinutes} min • {s.priceCents ? `RD$${(s.priceCents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Precio a consultar"}
                   </div>
                 </div>
                 <button
@@ -810,7 +812,7 @@ export function AgentSettingsView({
               />
               <input
                 type="number"
-                placeholder="Precio €"
+                placeholder="Precio RD$"
                 value={newServicePrice}
                 onChange={(e) => setNewServicePrice(Number(e.target.value))}
                 className="field"

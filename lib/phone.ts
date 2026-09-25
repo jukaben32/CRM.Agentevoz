@@ -7,7 +7,7 @@ import { env } from "@/lib/env";
  */
 export function normalizePhone(
   rawPhone?: string | null,
-  defaultCountry: CountryCode = (env.DEFAULT_COUNTRY_CODE as CountryCode) || "ES"
+  defaultCountry: CountryCode = (env.DEFAULT_COUNTRY_CODE as CountryCode) || "DO"
 ): string | null {
   if (!rawPhone || !rawPhone.trim()) return null;
 
@@ -25,6 +25,10 @@ export function normalizePhone(
   }
   if (digitsOnly.length === 9 && defaultCountry === "ES") {
     return `+34${digitsOnly}`;
+  }
+  // República Dominicana: 10 dígitos locales (809/829/849 + 7 dígitos), país +1
+  if (digitsOnly.length === 10 && defaultCountry === "DO" && /^(809|829|849)/.test(digitsOnly)) {
+    return `+1${digitsOnly}`;
   }
 
   return clean;

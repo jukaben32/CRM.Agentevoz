@@ -60,7 +60,7 @@ export async function bookAppointment(
     .where(eq(voiceAgents.businessId, businessId))
     .limit(1);
 
-  const timezone = business?.timezone || "Europe/Madrid";
+  const timezone = business?.timezone || "America/Santo_Domingo";
   const slotCapacity = agent?.slotCapacity || 1;
 
   // 3. Obtener duración del servicio
@@ -314,7 +314,7 @@ export async function rescheduleAppointment(
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
-  const timezone = business?.timezone || "Europe/Madrid";
+  const timezone = business?.timezone || "America/Santo_Domingo";
 
   const newStart = DateTime.fromISO(newStartIso, { zone: timezone });
   if (!newStart.isValid) {

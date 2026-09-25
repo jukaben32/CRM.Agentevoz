@@ -91,7 +91,7 @@ export default async function ConversacionesPage({ searchParams }: PageProps) {
       <ConversationsView
         callsList={callList}
         selectedCallDetail={detail}
-        timezone={session.businessTimezone || "Europe/Madrid"}
+        timezone={session.businessTimezone || "America/Santo_Domingo"}
       />
     </div>
   );

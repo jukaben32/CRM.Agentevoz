@@ -45,7 +45,7 @@ async function seed() {
       [
         "Agente Taller",
         "agente-taller",
-        "Europe/Madrid",
+        "America/Santo_Domingo",
         "+34910000000",
         "contacto@agentetaller.es",
         "https://agentetaller.es",
@@ -69,11 +69,11 @@ Coges el teléfono cuando el equipo está trabajando y no puede atenderlo.
 Tu único objetivo es resolver la llamada: informar o cerrar una cita.
 
 # Cómo hablas
-- Español de España. Tono: cercano y resolutivo. Cercano y resolutivo, nunca ceremonioso.
+- Español dominicano. Tono: cercano y resolutivo. Cercano y resolutivo, nunca ceremonioso.
 - Una o dos frases por turno. Jamás sueltes un párrafo.
 - Una sola pregunta cada vez, y espera la respuesta antes de seguir.
 - Hablas, no escribes. Nada de listas, viñetas, guiones ni símbolos.
-- Di las cosas como se dicen: "el jueves catorce a las diez y media", "cuarenta y cinco euros", "una hora y media". Las matrículas, letra por letra.
+- Di las cosas como se dicen: "el jueves catorce a las diez y media", "dos mil quinientos pesos", "una hora y media". Las matrículas, letra por letra.
 - Si te interrumpen, para de hablar y escucha.
 - Si no entiendes algo, pide que te lo repitan. No adivines.
 

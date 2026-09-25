@@ -109,7 +109,7 @@ pnpm vapi:sync
 | `APP_URL` | URL pública base (webhooks VAPI) | `https://<equipo>.<tailnet>.ts.net` (túnel, §Tailscale) | `https://crm-agentevoz.vercel.app` |
 | `VAPI_API_KEY` | Clave API privada de VAPI | igual | igual |
 | `VAPI_WEBHOOK_SECRET` / `VAPI_WEBHOOK_TOKEN` | Token del webhook (misma Custom Credential) | igual | igual |
-| `DEFAULT_TIMEZONE` / `DEFAULT_COUNTRY_CODE` | Localización por defecto | `Europe/Madrid` / `ES` | según negocio |
+| `DEFAULT_TIMEZONE` / `DEFAULT_COUNTRY_CODE` | Localización por defecto | `America/Santo_Domingo` / `DO` | según negocio |
 
 > ⚠️ **No incluyas `?sslmode=require` en `DATABASE_URL`/`DATABASE_DIRECT_URL` contra Supabase.** `pg` 8.x lo trata como `verify-full` e ignora la opción `ssl` que pone el código, y la conexión falla con `self-signed certificate in certificate chain`. El código (`lib/env.ts` → `toPgConnectionOptions()`) ya limpia ese parámetro si aparece, pero es más simple no ponerlo. Ver `docs/ESTADO-Y-PENDIENTES.md` §3.
 

@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
       await client.query(
         `INSERT INTO businesses (id, name, slug, timezone)
-         VALUES ($1, $2, $3, 'Europe/Madrid')`,
+         VALUES ($1, $2, $3, 'America/Santo_Domingo')`,
         [businessId, businessName.trim(), slug]
       );
 
@@ -78,16 +78,16 @@ export async function POST(req: NextRequest) {
 
       // 5. Crear Agente de Voz inicial con valores de NICHO
       const defaultPrompt = `# Identidad
-Eres el asistente virtual de ${businessName.trim()}, un ${NICHO_CONFIG.tipoNegocio} en España.
+Eres el asistente virtual de ${businessName.trim()}, un ${NICHO_CONFIG.tipoNegocio} en República Dominicana.
 Coges el teléfono cuando el equipo está trabajando y no puede atenderlo.
 Tu único objetivo es resolver la llamada: informar o cerrar una cita.
 
 # Cómo hablas
-- Español de España. Tono: cercano y resolutivo. Cercano y resolutivo, nunca ceremonioso.
+- Español dominicano. Tono: cercano y resolutivo. Cercano y resolutivo, nunca ceremonioso.
 - Una o dos frases por turno. Jamás sueltes un párrafo.
 - Una sola pregunta cada vez, y espera la respuesta antes de seguir.
 - Hablas, no escribes. Nada de listas, viñetas, guiones ni símbolos.
-- Di las cosas como se dicen: "el jueves catorce a las diez y media", "cuarenta y cinco euros".
+- Di las cosas como se dicen: "el jueves catorce a las diez y media", "dos mil quinientos pesos".
 - Si te interrumpen, para de hablar y escucha.
 - Si no entiendes algo, pide que te lo repitan. No adivines.`;
 

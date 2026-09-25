@@ -47,6 +47,26 @@ describe("Procesamiento de Payloads y Prompt de VAPI", () => {
     assert.match(prompt, /cercano y resolutivo/);
   });
 
+  it("debe dejar la fecha como variable de VAPI (no congelada) y usar pesos dominicanos", () => {
+    const { prompt } = getEffectivePrompt({
+      business: { name: "Taller Demo", timezone: "America/Santo_Domingo" } as any,
+      agent: { tone: "cercano" } as any,
+      hours: [],
+      services: [
+        { name: "Cambio de aceite", durationMinutes: 60, priceCents: 250000, isActive: true },
+      ] as any,
+      facts: [],
+    });
+
+    // VAPI sustituye {{"now" | date: ...}} en cada llamada: el agente siempre sabe el día real
+    assert.match(prompt, /\{\{"now" \| date: "[^"]+", "America\/Santo_Domingo"\}\}/);
+    // No debe quedar ninguna fecha escrita a mano (ej: "2026") dentro del prompt
+    assert.doesNotMatch(prompt, /\b20\d\d\b/);
+    // Moneda: pesos dominicanos, nada de euros
+    assert.match(prompt, /RD\$2,?500\.00/);
+    assert.doesNotMatch(prompt, /€|euros/);
+  });
+
   it("debe validar tokens con timingSafeEqual correctamente", () => {
     const secret = "vapi_secret_token_123456789";
     const headerValid = "Bearer vapi_secret_token_123456789";

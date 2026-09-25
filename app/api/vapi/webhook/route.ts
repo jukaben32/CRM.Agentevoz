@@ -24,13 +24,19 @@ import {
   cancelAppointment,
 } from "@/lib/scheduling/booking";
 import { env } from "@/lib/env";
+import { formatPesos } from "@/lib/vapi/prompt";
 
 /**
  * Verificación segura de token Bearer con timingSafeEqual
  */
 function verifyBearerToken(req: NextRequest): boolean {
   const expectedToken = env.VAPI_WEBHOOK_TOKEN;
-  if (!expectedToken) return true; // Si no hay token configurado en local, permitir
+  if (!expectedToken) {
+    // En producción, sin token configurado el webhook quedaría abierto a
+    // cualquiera: se cierra por defecto. En local/desarrollo se permite para
+    // no bloquear pruebas rápidas antes de tener VAPI_WEBHOOK_TOKEN en .env.
+    return env.NODE_ENV !== "production";
+  }
 
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -290,7 +296,7 @@ export async function POST(req: NextRequest) {
 
               const factsText = factsList.map((f) => `${f.question}: ${f.answer}`).join(". ");
               const srvText = servicesList
-                .map((s) => `${s.name} (${s.durationMinutes} min, ${s.priceCents ? s.priceCents / 100 + "€" : "consultar"})`)
+                .map((s) => `${s.name} (${s.durationMinutes} min, ${s.priceCents ? formatPesos(s.priceCents) : "consultar"})`)
                 .join(", ");
 
               const info = `Dirección: ${business?.address || "No especificada"}. Servicios: ${srvText}. Preguntas frecuentes: ${factsText}`;

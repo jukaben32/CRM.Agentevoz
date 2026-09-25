@@ -63,7 +63,7 @@ export default async function AgendaPage() {
 
       <CalendarView
         initialAppointments={appointmentList}
-        timezone={session.businessTimezone || "Europe/Madrid"}
+        timezone={session.businessTimezone || "America/Santo_Domingo"}
         businessHours={hoursList}
       />
     </div>

@@ -29,7 +29,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const session = await requireSession();
   const { periodo = "30d" } = await searchParams;
 
-  const now = DateTime.now().setZone(session.businessTimezone || "Europe/Madrid");
+  const now = DateTime.now().setZone(session.businessTimezone || "America/Santo_Domingo");
   let startDate: DateTime;
 
   if (periodo === "7d") {

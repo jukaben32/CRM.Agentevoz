@@ -34,18 +34,29 @@ export async function realignServerUrlAction() {
     throw new Error("VAPI_API_KEY no configurada.");
   }
 
-  const webhookUrl = `${env.APP_URL}/api/vapi/webhook`;
-  const serverPayload: Record<string, any> = { url: webhookUrl };
-  if (env.VAPI_SERVER_CREDENTIAL_ID) {
-    serverPayload.credentialId = env.VAPI_SERVER_CREDENTIAL_ID;
+  // Sin credencial, VAPI llamará al webhook sin cabecera Authorization y
+  // este responderá 401 en producción: todas las tools fallarían en llamada
+  // real. Avisamos aquí en vez de dejar que "Re-alinear" reporte éxito falso.
+  if (!env.VAPI_SERVER_CREDENTIAL_ID) {
+    throw new Error(
+      "Falta VAPI_SERVER_CREDENTIAL_ID. Crea una Custom Credential (Bearer Token) en el dashboard de VAPI con el mismo valor que VAPI_WEBHOOK_TOKEN, copia su ID en esa variable de entorno y vuelve a intentarlo."
+    );
   }
+
+  const webhookUrl = `${env.APP_URL}/api/vapi/webhook`;
+  const serverPayload: Record<string, any> = {
+    url: webhookUrl,
+    credentialId: env.VAPI_SERVER_CREDENTIAL_ID,
+  };
+
+  const errors: string[] = [];
 
   // 1. Actualizar tools compartidas en VAPI
   await withTenant(session.businessId, async (tx) => {
     const tools = await tx.select().from(vapiTools);
     for (const tool of tools) {
       try {
-        await fetch(`https://api.vapi.ai/tool/${tool.vapiToolId}`, {
+        const res = await fetch(`https://api.vapi.ai/tool/${tool.vapiToolId}`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${env.VAPI_API_KEY}`,
@@ -53,8 +64,11 @@ export async function realignServerUrlAction() {
           },
           body: JSON.stringify({ server: serverPayload }),
         });
-      } catch (err) {
-        console.warn(`Error al actualizar tool ${tool.name}:`, err);
+        if (!res.ok) {
+          errors.push(`Tool '${tool.name}': HTTP ${res.status} ${await res.text()}`);
+        }
+      } catch (err: any) {
+        errors.push(`Tool '${tool.name}': ${err.message}`);
       }
     }
 
@@ -66,17 +80,29 @@ export async function realignServerUrlAction() {
       .limit(1);
 
     if (agent?.vapiAssistantId) {
-      await fetch(`https://api.vapi.ai/assistant/${agent.vapiAssistantId}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${env.VAPI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ server: serverPayload }),
-      });
+      try {
+        const res = await fetch(`https://api.vapi.ai/assistant/${agent.vapiAssistantId}`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${env.VAPI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ server: serverPayload }),
+        });
+        if (!res.ok) {
+          errors.push(`Asistente: HTTP ${res.status} ${await res.text()}`);
+        }
+      } catch (err: any) {
+        errors.push(`Asistente: ${err.message}`);
+      }
     }
   });
 
   revalidatePath("/conexiones");
+
+  if (errors.length > 0) {
+    throw new Error(`Re-alineado con errores: ${errors.join(" | ")}`);
+  }
+
   return { success: true, updatedUrl: webhookUrl };
 }

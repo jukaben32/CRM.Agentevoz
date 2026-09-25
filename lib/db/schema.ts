@@ -16,7 +16,7 @@ export const businesses = pgTable("businesses", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  timezone: text("timezone").notNull().default("Europe/Madrid"),
+  timezone: text("timezone").notNull().default("America/Santo_Domingo"),
   phone: text("phone"),
   email: text("email"),
   website: text("website"),

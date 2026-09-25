@@ -26,8 +26,8 @@ const envSchema = z.object({
   VAPI_WEBHOOK_TOKEN: z.string().optional(),
   VAPI_WEBHOOK_SECRET: z.string().optional(),
 
-  DEFAULT_TIMEZONE: z.string().default("Europe/Madrid"),
-  DEFAULT_COUNTRY_CODE: z.string().default("ES"),
+  DEFAULT_TIMEZONE: z.string().default("America/Santo_Domingo"),
+  DEFAULT_COUNTRY_CODE: z.string().default("DO"),
 
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
