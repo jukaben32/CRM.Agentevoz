@@ -2,7 +2,7 @@
 
 > Documento vivo. Refleja la realidad del despliegue en cada momento — actualízalo en la misma tanda de trabajo en que cambie algo relevante (mismo criterio que `CLAUDE.md`/`AGENTS.md`, ver §0.3 del prompt original).
 >
-> Última actualización: **19 de septiembre de 2026**.
+> Última actualización: **25 de septiembre de 2026**.
 
 ---
 
@@ -44,14 +44,14 @@ El código sigue siendo compatible con la vía autoalojada (Docker Compose + Dok
 - `server.url` del asistente y de las 7 tools apuntando a `https://crm-agentevoz.vercel.app/api/vapi/webhook`.
 - Ping de salud (`/api/health`) respondiendo `200`.
 
-### ❌ Pendiente: número de teléfono
-No hay ningún número vinculado al asistente (`vapi_phone_number_id` es `NULL`). Requiere que el dueño del negocio importe un número real desde **Twilio, Telnyx o Vonage** (ver §14.3 del prompt original) y lo vincule en VAPI. Es el único paso que no se puede hacer sin una cuenta de telefonía propia del usuario.
+### ❌ Pendiente: número de teléfono — ⏸ en stand by
+No hay ningún número vinculado al asistente (`vapi_phone_number_id` es `NULL`). Requiere importar un número real en VAPI desde **Twilio, Telnyx o Vonage** (ver §14.3 del prompt original). **Pendiente de decidir**: número dominicano (809/829/849 — poca disponibilidad de números de voz en Twilio para RD) o número norteamericano (+1 EE. UU., mucha más disponibilidad). Es el único paso que no se puede hacer sin una cuenta de telefonía propia del usuario.
 
-Mientras tanto, el asistente se puede probar directamente desde el dashboard de VAPI (botón "Talk").
+Mientras tanto, el asistente se puede probar directamente desde el dashboard de VAPI (botón "Talk"), o simulando el webhook (ver §5).
 
 ---
 
-## 3. Bugs reales encontrados y corregidos
+## 3. Bugs reales encontrados y corregidos (primera ronda, hasta el 19 de septiembre)
 
 Estos no estaban en el plan original — aparecieron al pasar de "generado por IA" a "funcionando de verdad en producción". Se documentan aquí porque son el tipo de fallo silencioso que el propio prompt (§14.6) pide recoger.
 
@@ -65,8 +65,39 @@ Estos no estaban en el plan original — aparecieron al pasar de "generado por I
 
 ---
 
-## 4. Notas para quien retome esto
+## 4. Notas para quien retome esto (primera ronda)
 
 - El **rate limit de login** se dejó en 20 intentos/5 min (el prompt original no especifica un número; era 6 en el código generado). Si se quiere más estricto, es una línea en `app/api/auth/login/route.ts`.
 - `scripts/supabase-migrate.ts` es un script de aprovisionamiento inicial (crea extensiones, aplica el schema y siembra el negocio demo directamente vía la API de gestión de Supabase, sin necesitar conexión Postgres directa). Útil para provisionar un proyecto Supabase nuevo desde cero; no es parte del flujo normal de `pnpm db:migrate` / `pnpm db:seed`.
 - Si se despliega una segunda instancia (otro negocio, otro entorno), recordar: (1) `DATABASE_URL`/`DATABASE_DIRECT_URL` sin `sslmode` en la query string — el código ya lo limpia solo si se le pasa, pero es más claro no incluirlo; (2) correr `pnpm vapi:tools:sync` **una vez**, contra la base de datos correcta, antes de provisionar ningún asistente, para que `vapi_tools` no quede vacía.
+
+---
+
+## 5. Auditoría del 25 de septiembre de 2026: 4 bugs operativos encontrados y corregidos
+
+Se hizo una revisión completa a petición del usuario ("dime qué le falta para estar operativo, examínalo"). Antes de esta sesión, **el asistente no podía completar ninguna operación real** aunque hubiera tenido número de teléfono: cualquier llamada real habría fallado en la primera herramienta. Se encontraron y corrigieron 4 problemas, verificados con llamadas simuladas reales contra el webhook de producción (`status-update` + `tool-calls`, la misma secuencia que manda VAPI):
+
+| # | Bug | Cómo se detectó | Fix |
+|---|---|---|---|
+| 1 | Ni el asistente ni las 7 tools tenían `server.credentialId` en VAPI (`isServerUrlSecretSet: false`). El webhook exige `Authorization: Bearer` y sin credencial VAPI nunca la manda → **401 en cada tool-call**. | Lectura directa de la API de VAPI (`GET /assistant/:id`, `GET /tool`). | Se creó una Custom Credential Bearer en VAPI (`e49608dc-7821-4e46-b69d-07e02d757c70`) con el mismo valor que `VAPI_WEBHOOK_TOKEN`, se añadió `VAPI_SERVER_CREDENTIAL_ID` en Vercel (los 3 entornos) y se aplicó a las 7 tools + el asistente. `connections-actions.ts` y `vapi-sync.ts` ahora usan `credentialId` (antes `vapi-sync.ts` mandaba `server.secret`, que VAPI ignora para esta validación) y verifican `res.ok` antes de reportar éxito. |
+| 2 | El asistente en VAPI no tenía ningún system prompt (`model.messages` vacío). | Misma lectura de `GET /assistant/:id`. | Se re-provisionó el prompt vía API con los datos reales del negocio demo. |
+| 3 | `lib/vapi/prompt.ts` escribía la fecha/hora "de hoy" en el momento de provisionar el asistente, no en cada llamada. Al día siguiente el agente seguiría creyendo que es el día en que se generó el prompt. | Lectura del código. | La fecha/hora ahora son variables Liquid (`{{"now" \| date: ..., "<timezone>"}}`) que VAPI resuelve en cada llamada real. |
+| 4 | **Crítico:** `reservarCita` fallaba siempre con "No se pudo completar la operación en la agenda en este momento" — sin dejar rastro visible para quien no mirase los logs. `appointments.call_id` es una FK a `calls.id` (UUID interno generado por nosotros), pero `bookAppointment` recibía y guardaba directamente el `vapiCallId` (ID externo de VAPI) sin resolverlo, así que el insert siempre violaba `appointments_call_id_fkey`. | Se probó `reservarCita` end-to-end simulando la secuencia real de eventos (`status-update` para crear la fila en `calls`, luego `tool-calls`) contra el webhook de producción y se leyó el error real en `vercel logs`. | `lib/scheduling/booking.ts`: antes de insertar la cita, se resuelve `calls.id` a partir de `calls.vapiCallId = callId`. |
+
+**Verificado end-to-end tras el fix**: `datosDelNegocio`, `consultarHuecos` y `reservarCita` (con secuencia `status-update` → `tool-calls`) devuelven `200` y datos reales de la base de datos de producción. La cita de prueba creada (`Prueba Diagnostico Claude`, 28/sep 09:00) se **anuló** tras verificar. Queda un contacto de prueba (`Prueba Diagnostico Claude`, tel. `+34600000099`, origen "agente_voz") en **Contactos** — no había forma de borrarlo sin acceso directo a la base de datos desde esta sesión; se puede eliminar a mano desde el CRM cuando convenga.
+
+**Nota sobre huecos ofrecidos "en el pasado":** durante la verificación, `consultarHuecos` devolvió alguna vez una franja horaria que, a simple vista, ya había pasado ese mismo día. No se investigó a fondo (fuera del alcance de esta auditoría) — si vuelve a observarse, revisar `lib/scheduling/availability.ts` (filtro `slotStart < earliestAllowed`) y el valor real de `min_notice_minutes` del agente en producción.
+
+### Localización a República Dominicana (pedido explícito del usuario)
+Se cambiaron los **valores por defecto del código** (nuevas señales, nuevos negocios que se registren, y el semillero `pnpm db:seed`) a República Dominicana:
+- `DEFAULT_TIMEZONE=America/Santo_Domingo`, `DEFAULT_COUNTRY_CODE=DO` (código y Vercel, los 3 entornos).
+- Moneda: pesos dominicanos (`RD$`) en vez de euros, en todo el código (prompt, webhook, vista de Estudio).
+- `lib/phone.ts` normaliza números dominicanos (809/829/849, 10 dígitos) a `+1...`.
+- Selector de zona horaria en Estudio: `America/Santo_Domingo` ahora es la opción recomendada.
+
+**Importante — esto NO tocó los datos ya existentes**: el negocio demo real "Agente Taller" en la base de datos de producción sigue con `timezone = Europe/Madrid` y precios en el formato antiguo (el asistente re-provisionado en esta sesión respeta ese dato real, no inventa uno nuevo). Si se quiere que el propio negocio demo pase a operar en RD, hay que entrar a **Estudio** (con sesión iniciada) y guardar ahí la zona horaria nueva — los cambios de código no migran filas ya existentes.
+
+## 6. Notas para quien retome esto (segunda ronda, 25 de septiembre)
+
+- El asistente y las 7 tools se re-provisionaron **directamente vía API de VAPI** en esta sesión (no se hizo clic en "Re-alinear"/"Provisionar Asistente" desde el CRM), porque no había acceso a `DATABASE_URL`/`DATABASE_DIRECT_URL` de producción desde este entorno de trabajo (bloqueo intencional de seguridad). La próxima vez que alguien use el botón "Provisionar Asistente" desde **Conexiones**, sobrescribirá el prompt con los datos reales actuales de la base de datos — es el camino normal y preferido a partir de ahora que `VAPI_SERVER_CREDENTIAL_ID` ya está configurada.
+- Si en algún momento se rota `VAPI_WEBHOOK_TOKEN`, hay que crear una **nueva** Custom Credential en VAPI con el valor nuevo (o editar la existente, id `e49608dc-7821-4e46-b69d-07e02d757c70`) y volver a pulsar "Re-alinear con APP_URL" — la credencial no se actualiza sola.
