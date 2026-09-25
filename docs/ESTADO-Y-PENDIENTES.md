@@ -125,3 +125,53 @@ Se dejó el código listo para cuando se quiera activar (mismo patrón que `VAPI
 **Para activarlo en el futuro** (cuando se suba de plan, o se decida usar una voz propia/clonada en vez de "Carolina"): crear la credencial en VAPI (`POST /credential` con `{"provider":"11labs","apiKey":"<ELEVENLABS_API_KEY>"}`), poner su `id` en `ELEVENLABS_CREDENTIAL_ID` (local y en Vercel, los 3 entornos) y re-provisionar el asistente.
 
 **Nota sobre `stability`/`similarityBoost`/`style`/`useSpeakerBoost`**: no se tocaron (se dejaron en los valores por defecto de ElevenLabs/VAPI). Ajustarlos bien requiere escuchar audio real, y esta sesión no tiene forma de reproducir/verificar audio — si se afinan, hacerlo escuchando llamadas de prueba reales, no a ciegas.
+
+## 8. Plan futuro: Integración VAPI + WhatsApp Business (deferred)
+
+**Decisión del usuario:** mantener VAPI operativo ahora (telefonía RTC/VoIP tradicional); agregar WhatsApp como canal paralelo en el futuro si la métrica de tráfico lo justifica.
+
+### Contexto técnico
+VAPI y WhatsApp son **protocolos completamente distintos**:
+- **VAPI (actual)**: orquesta llamadas RTC/VoIP via Twilio/Vonage/Telnyx. El agente recibe y resuelve llamadas de voz sincrónicas en tiempo real.
+- **WhatsApp Business API (futuro)**: API propietaria de Meta. Agente resuelve mensajes asincronos (y audio) dentro de la app WhatsApp, no telefonía tradicional.
+
+Un número de Twilio funciona **solo para telefonía RTC** (VAPI). Para WhatsApp se necesita:
+1. Meta Business Account (gratuito)
+2. WhatsApp Business Phone Number (dedicado a WhatsApp, no a VAPI)
+3. Integración completamente distinta con su propia API (`https://graph.instagram.com/v18.0/...`)
+
+### Arquitectura propuesta
+```
+Contacto usuario (dos canales paralelos):
+┌─────────────────────────────────────┐
+│  1. Llamada RTC normal (Twilio+VAPI)│
+│  2. Mensaje en WhatsApp (Meta API)   │
+└──────────────┬──────────────────────┘
+               ↓
+         Tu CRM Agentevoz
+         (una sola DB, dos vías de entrada)
+```
+
+**Ventaja:** el usuario elige cómo contactar. Ambas conversaciones quedan en el mismo CRM, con historial unificado.
+
+### Trabajo estimado
+**Backend:**
+- Nueva carpeta `lib/whatsapp/` con cliente de Meta Cloud API
+- Nuevo endpoint `app/api/whatsapp/webhook` (recibir mensajes, validar firmas)
+- Agente IA distinto (o adaptación del existente) que maneje WhatsApp en lugar de VAPI
+- Nueva tabla `whatsapp_conversations` + `whatsapp_messages`
+- Lógica de vinculación contacto-WhatsApp (diferente a vinculación contacto-VAPI)
+
+**Frontend:**
+- Sección nueva en **Conversaciones** para mensajes de WhatsApp
+- Nuevo campo de contacto: "Número de WhatsApp" (distinto al teléfono VAPI)
+
+**Configuración:**
+- `.env`: `WHATSAPP_BUSINESS_ACCOUNT_ID`, `WHATSAPP_API_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`
+- En Vercel: mismas variables en los 3 entornos
+- En Meta Business Manager: crear aplicación, generar token, validar webhook
+
+### Cuándo activarlo
+- Tras verificar que VAPI con número de Twilio funciona en producción (llamadas reales, no solo "Talk")
+- Si métricas muestran demanda de otro canal (p.ej., si usuarios piden "¿por qué no puedo por WhatsApp?")
+- O si el nicho específico del taller lo pide (p.ej., clientes jóvenes que casi no usan voz, solo mensajería)
