@@ -25,7 +25,7 @@ export default async function ConexionesPage() {
   });
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
       <ConnectionsView
         agent={agent}
         tools={tools}
