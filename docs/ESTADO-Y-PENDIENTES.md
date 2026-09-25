@@ -111,6 +111,16 @@ El usuario compartió un análisis comparativo Vapi-vs-ElevenLabs; el proyecto *
 - **`stopSpeakingPlan.numWords: 2`** en el asistente: evita que el agente se calle en seco si el cliente suelta un "sí"/"vale" de dos palabras mientras habla — mejora el manejo de interrupciones que el análisis destaca como fortaleza de Vapi, sin tocar los demás valores por defecto de la plataforma.
 - **Tool nativo `endCall` añadido** (`lib/vapi/actions.ts`, y en vivo vía API): antes la llamada nunca colgaba sola tras la despedida, seguía "abierta" (y facturando minutos) hasta el límite de 10 minutos. El prompt (`lib/vapi/prompt.ts`) ahora instruye explícitamente colgar tras despedirse. Esto lo exige la skill `create-assistant` de VAPI ("Attach the native endCall tool to every newly built assistant") — se detectó al leerla tras instalar `VapiAI/skills` en este repo.
 
-**Pendiente, requiere decisión/credencial del usuario**: VAPI usa su propia cuenta compartida de ElevenLabs por defecto (sin `credentialId` en el bloque `voice`). Se puede conectar una cuenta propia de ElevenLabs (Integrations → API key propia) para no depender del pool compartido de VAPI — mejora fiabilidad bajo carga y separa el coste/cuota de ElevenLabs del de VAPI. Necesita que el usuario aporte su propia clave de ElevenLabs.
+### Cuenta propia de ElevenLabs — probada, de momento en espera
+
+El usuario dio su API key de ElevenLabs (`.env` local, `ELEVENLABS_API_KEY`, no versionada). Se validó **sin gastar cuota**: la clave autentica correctamente contra la API de ElevenLabs, pero la cuenta es **plan gratuito**, y ElevenLabs bloquea el uso por API de voces de la Biblioteca (como "Carolina", la voz actual, `UOIqAnmS11Reiei1Ytkc`) en el plan free — devuelve `402 payment_required` / `paid_plan_required` antes de generar ningún audio.
+
+**Decisión del usuario**: seguir por ahora con el pool compartido de ElevenLabs de VAPI (que ya funciona con Carolina sin coste ni credencial propia). No se creó ninguna Custom Credential "11labs" en VAPI ni se tocó el asistente en vivo por este motivo.
+
+Se dejó el código listo para cuando se quiera activar (mismo patrón que `VAPI_SERVER_CREDENTIAL_ID`):
+- `lib/env.ts`: `ELEVENLABS_API_KEY` (solo para crear/rotar la credencial a mano) y `ELEVENLABS_CREDENTIAL_ID` (la que de verdad usa el código).
+- `lib/vapi/actions.ts`: si `ELEVENLABS_CREDENTIAL_ID` está configurada, se añade como `credentialId` en `voice` al provisionar. Vacía = comportamiento actual (pool de VAPI), sin cambios.
+
+**Para activarlo en el futuro** (cuando se suba de plan, o se decida usar una voz propia/clonada en vez de "Carolina"): crear la credencial en VAPI (`POST /credential` con `{"provider":"11labs","apiKey":"<ELEVENLABS_API_KEY>"}`), poner su `id` en `ELEVENLABS_CREDENTIAL_ID` (local y en Vercel, los 3 entornos) y re-provisionar el asistente.
 
 **Nota sobre `stability`/`similarityBoost`/`style`/`useSpeakerBoost`**: no se tocaron (se dejaron en los valores por defecto de ElevenLabs/VAPI). Ajustarlos bien requiere escuchar audio real, y esta sesión no tiene forma de reproducir/verificar audio — si se afinan, hacerlo escuchando llamadas de prueba reales, no a ciegas.

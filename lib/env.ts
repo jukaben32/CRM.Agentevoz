@@ -26,6 +26,14 @@ const envSchema = z.object({
   VAPI_WEBHOOK_TOKEN: z.string().optional(),
   VAPI_WEBHOOK_SECRET: z.string().optional(),
 
+  // Cuenta propia de ElevenLabs (opcional). ELEVENLABS_API_KEY solo se usa
+  // para crear/rotar la Custom Credential "11labs" en VAPI a mano; el código
+  // en producción solo lee ELEVENLABS_CREDENTIAL_ID (el ID de esa credencial
+  // ya creada en VAPI). Sin ninguna de las dos, se sigue usando el pool
+  // compartido de ElevenLabs de VAPI (comportamiento por defecto).
+  ELEVENLABS_API_KEY: z.string().optional(),
+  ELEVENLABS_CREDENTIAL_ID: z.string().optional(),
+
   DEFAULT_TIMEZONE: z.string().default("America/Santo_Domingo"),
   DEFAULT_COUNTRY_CODE: z.string().default("DO"),
 
@@ -46,6 +54,8 @@ export const env = envSchema.parse({
   VAPI_SERVER_CREDENTIAL_ID: process.env.VAPI_SERVER_CREDENTIAL_ID,
   VAPI_WEBHOOK_TOKEN: process.env.VAPI_WEBHOOK_TOKEN || process.env.VAPI_WEBHOOK_SECRET,
   VAPI_WEBHOOK_SECRET: process.env.VAPI_WEBHOOK_SECRET || process.env.VAPI_WEBHOOK_TOKEN,
+  ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
+  ELEVENLABS_CREDENTIAL_ID: process.env.ELEVENLABS_CREDENTIAL_ID,
   DEFAULT_TIMEZONE: process.env.DEFAULT_TIMEZONE,
   DEFAULT_COUNTRY_CODE: process.env.DEFAULT_COUNTRY_CODE,
   NODE_ENV: process.env.NODE_ENV,

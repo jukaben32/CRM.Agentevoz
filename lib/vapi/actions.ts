@@ -304,6 +304,12 @@ export async function publishAgentToVapi() {
     };
     if (agent.voiceModel) voicePayload.model = agent.voiceModel;
     if (agent.voiceLanguage) voicePayload.language = agent.voiceLanguage;
+    // Cuenta propia de ElevenLabs, si está configurada (ver lib/env.ts). Sin
+    // esto, VAPI usa su propio pool compartido de ElevenLabs (comportamiento
+    // actual y por defecto).
+    if (env.ELEVENLABS_CREDENTIAL_ID && voicePayload.provider === "11labs") {
+      voicePayload.credentialId = env.ELEVENLABS_CREDENTIAL_ID;
+    }
 
     const assistantPayload = {
       name: business.name.slice(0, 40), // Máximo 40 caracteres exigido por VAPI
