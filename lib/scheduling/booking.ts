@@ -190,13 +190,30 @@ export async function bookAppointment(
     contactId = newContact.id;
   }
 
+  // 6.5. Resolver el ID interno de la llamada: `callId` que llega aquí es el
+  // vapiCallId (externo, string libre de VAPI), pero appointments.call_id es
+  // una FK a calls.id (UUID interno, generado por nosotros). Sin esta
+  // resolución, el insert de más abajo siempre fallaba con una violación de
+  // clave foránea ("insert or update on table appointments violates foreign
+  // key constraint appointments_call_id_fkey") y reservarCita nunca lograba
+  // guardar ninguna cita durante una llamada real.
+  let internalCallId: string | null = null;
+  if (callId) {
+    const [callRow] = await tx
+      .select({ id: calls.id })
+      .from(calls)
+      .where(and(eq(calls.businessId, businessId), eq(calls.vapiCallId, callId)))
+      .limit(1);
+    if (callRow) internalCallId = callRow.id;
+  }
+
   // 7. Insertar la cita en appointments
   const [newAppointment] = await tx
     .insert(appointments)
     .values({
       businessId,
       contactId,
-      callId: callId || null,
+      callId: internalCallId,
       serviceId: matchedService?.id || null,
       serviceName: canonicalServiceName,
       startsAt: requestedStart.toJSDate(),
