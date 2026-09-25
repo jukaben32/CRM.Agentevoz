@@ -76,7 +76,7 @@ export const voiceAgents = pgTable("voice_agents", {
   tone: text("tone").notNull().default("cercano y resolutivo"),
   voiceProvider: text("voice_provider").notNull().default("11labs"),
   voiceId: text("voice_id").notNull().default("UOIqAnmS11Reiei1Ytkc"),
-  voiceModel: text("voice_model").default("eleven_turbo_v2_5"),
+  voiceModel: text("voice_model").default("eleven_flash_v2_5"),
   voiceLanguage: text("voice_language").default("es"),
   language: text("language").notNull().default("es"),
   model: jsonb("model").notNull().default({ provider: "openai", model: "gpt-4.1-mini" }),

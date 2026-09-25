@@ -99,7 +99,7 @@ Página web: https://agentetaller.es
          slot_capacity, min_notice_minutes, booking_horizon_days
        ) VALUES (
          $1, $2, $3, $4,
-         '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_turbo_v2_5', 'es', 'es',
+         '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_flash_v2_5', 'es', 'es',
          '{"provider":"openai","model":"gpt-4.1-mini"}'::jsonb,
          '{"provider":"deepgram","model":"nova-3-general","language":"es"}'::jsonb,
          '+34600112233', 'Te paso con un mecánico del taller un segundo.',

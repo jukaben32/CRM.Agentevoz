@@ -98,7 +98,7 @@ Tu único objetivo es resolver la llamada: informar o cerrar una cita.
            model, transcriber, handoff_message, slot_capacity, min_notice_minutes, booking_horizon_days
          ) VALUES (
            $1, $2, $3, 'cercano y resolutivo',
-           '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_turbo_v2_5', 'es', 'es',
+           '11labs', 'UOIqAnmS11Reiei1Ytkc', 'eleven_flash_v2_5', 'es', 'es',
            '{"provider":"openai","model":"gpt-4.1-mini"}'::jsonb,
            '{"provider":"deepgram","model":"nova-3-general","language":"es"}'::jsonb,
            'Te paso con un mecánico del taller un segundo.', 1, 60, 14

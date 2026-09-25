@@ -283,6 +283,18 @@ export async function publishAgentToVapi() {
       provider: (agent.model as any)?.provider || "openai",
       model: (agent.model as any)?.model || "gpt-4.1-mini",
       toolIds,
+      // Tool nativo endCall: sin él la llamada nunca cuelga sola tras la
+      // despedida y sigue consumiendo minutos hasta maxDurationSeconds.
+      tools: [
+        {
+          type: "endCall",
+          function: {
+            name: "end_completed_call",
+            description:
+              "Cuelga la llamada. Úsala solo después de haber confirmado que el objetivo de la llamada está resuelto (cita gestionada o consulta respondida) y de haberte despedido explícitamente. No la uses solo porque el cliente calla o hay una pausa.",
+          },
+        },
+      ],
       messages: [{ role: "system", content: effectivePrompt }],
     };
 
