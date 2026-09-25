@@ -68,73 +68,75 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
     <div className="space-y-6">
       {feedback && (
         <div
-          className={`p-4 rounded-2xl text-xs flex items-center justify-between border ${
+          className={`p-3 md:p-4 rounded-xl md:rounded-2xl text-xs flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between border ${
             feedback.type === "success"
               ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
               : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800"
           }`}
         >
-          <div className="flex items-center gap-2">
-            {feedback.type === "success" ? <CheckCircle size={18} /> : <WarningCircle size={18} />}
-            <span className="font-medium">{feedback.message}</span>
+          <div className="flex items-start sm:items-center gap-2 min-w-0">
+            {feedback.type === "success" ? <CheckCircle size={18} className="flex-shrink-0 mt-0.5 sm:mt-0" /> : <WarningCircle size={18} className="flex-shrink-0 mt-0.5 sm:mt-0" />}
+            <span className="font-medium text-xs leading-tight break-words">{feedback.message}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer">
+          <button onClick={() => setFeedback(null)} className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer flex-shrink-0 self-start sm:self-center">
             ×
           </button>
         </div>
       )}
 
       {/* 1. Comparador de Server URL (§12 - Vista 6) */}
-      <div className="card-saas p-6 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
-          <div className="flex items-center gap-2">
-            <Globe size={18} className="text-orange-600" />
-            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+      <div className="card-saas p-4 md:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-stone-100 dark:border-stone-800">
+          <div className="flex items-center gap-2 min-w-0">
+            <Globe size={18} className="text-orange-600 flex-shrink-0" />
+            <h2 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
               Comparador de Server URL (Webhook)
             </h2>
           </div>
           <button
             onClick={handleRealignUrls}
             disabled={isPending}
-            className="btn btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
+            className="btn btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
           >
             <ArrowsClockwise size={14} className={isPending ? "animate-spin" : ""} />
-            <span>Re-alinear con APP_URL</span>
+            <span className="hidden sm:inline">Re-alinear</span>
+            <span className="sm:hidden">Re-alinear URL</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-800 space-y-1">
-            <span className="text-[11px] font-semibold text-stone-500">URL derivada de la plataforma (APP_URL):</span>
-            <div className="font-mono text-stone-900 dark:text-stone-100 font-medium break-all">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 text-xs">
+          <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-800 space-y-1">
+            <span className="text-[10px] md:text-[11px] font-semibold text-stone-500 line-clamp-2">URL derivada de plataforma (APP_URL):</span>
+            <div className="font-mono text-stone-900 dark:text-stone-100 font-medium break-all text-[10px] md:text-xs">
               {expectedWebhookUrl}
             </div>
-            <div className="text-[10px] text-stone-400 pt-1">
-              Es la ruta pública donde VAPI envía las peticiones de herramientas y los reportes de llamada.
+            <div className="text-[9px] md:text-[10px] text-stone-400 pt-1">
+              Ruta pública donde VAPI envía peticiones y reportes.
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-800 space-y-1">
-            <span className="text-[11px] font-semibold text-stone-500">Prueba de conectividad inmediata:</span>
+          <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-800 space-y-1">
+            <span className="text-[10px] md:text-[11px] font-semibold text-stone-500">Prueba de conectividad:</span>
             <div>
               <button
                 onClick={handleTestPing}
                 disabled={isPending}
-                className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5 mt-1"
+                className="btn btn-primary text-xs py-1 px-2 md:py-1.5 md:px-3 flex items-center gap-1 mt-1 whitespace-nowrap text-[10px] md:text-xs"
               >
-                <Lightning size={14} />
-                <span>Enviar Ping a la aplicación</span>
+                <Lightning size={12} className="md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Enviar Ping</span>
+                <span className="sm:hidden">Ping</span>
               </button>
             </div>
             {pingResult && (
-              <div className="pt-2 text-[11px]">
+              <div className="pt-2 text-[9px] md:text-[11px]">
                 {pingResult.success ? (
-                  <span className="text-emerald-600 font-medium flex items-center gap-1">
-                    <CheckCircle size={14} /> Conexión con webhook verificada correctamente (status: ok)
+                  <span className="text-emerald-600 font-medium flex items-start gap-1">
+                    <CheckCircle size={12} className="flex-shrink-0 mt-0.5 md:w-4 md:h-4" /> Conexión verificada (status: ok)
                   </span>
                 ) : (
-                  <span className="text-rose-600 font-medium flex items-center gap-1">
-                    <WarningCircle size={14} /> Error de ping: {pingResult.error}
+                  <span className="text-rose-600 font-medium flex items-start gap-1">
+                    <WarningCircle size={12} className="flex-shrink-0 mt-0.5 md:w-4 md:h-4" /> Error: {pingResult.error}
                   </span>
                 )}
               </div>
@@ -144,9 +146,9 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
       </div>
 
       {/* 2. Estado de Asistente y Número de VAPI */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
         {/* Asistente */}
-        <div className="card-saas p-6 space-y-4 flex flex-col justify-between">
+        <div className="card-saas p-4 md:p-6 space-y-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100 dark:border-stone-800">
               <PlugsConnected size={18} className="text-orange-600" />
@@ -237,43 +239,53 @@ export function ConnectionsView({ agent, tools, appUrl }: ConnectionsViewProps) 
       </div>
 
       {/* 3. Tools Compartidas en VAPI */}
-      <div className="card-saas p-6 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
-          <div className="flex items-center gap-2">
-            <Wrench size={18} className="text-orange-600" />
-            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-              Tools Compartidas de la Plataforma
+      <div className="card-saas p-4 md:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-stone-100 dark:border-stone-800">
+          <div className="flex items-center gap-2 min-w-0">
+            <Wrench size={18} className="text-orange-600 flex-shrink-0" />
+            <h2 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
+              Tools Compartidas
             </h2>
           </div>
-          <span className="text-xs text-stone-500">{tools.length} herramientas registradas</span>
+          <span className="text-xs text-stone-500 flex-shrink-0">{tools.length} herramientas</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 font-semibold">
-                <th className="py-2.5">Nombre de la herramienta</th>
-                <th className="py-2.5">VAPI Tool ID</th>
-                <th className="py-2.5">Checksum</th>
-                <th className="py-2.5 text-right">Sincronizada</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
-              {tools.map((t) => (
-                <tr key={t.name}>
-                  <td className="py-2.5 font-mono font-medium text-stone-900 dark:text-stone-100">
-                    {t.name}
-                  </td>
-                  <td className="py-2.5 font-mono text-stone-500">{t.vapiToolId}</td>
-                  <td className="py-2.5 font-mono text-stone-400">{t.checksum}</td>
-                  <td className="py-2.5 text-right text-stone-500">
-                    {new Date(t.syncedAt).toLocaleDateString("es-ES")}
-                  </td>
+        {tools.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-xs text-stone-500">No hay herramientas registradas</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 font-semibold">
+                  <th className="py-2.5 px-2 md:px-0">Nombre</th>
+                  <th className="py-2.5 px-2 md:px-0 hidden sm:table-cell">VAPI ID</th>
+                  <th className="py-2.5 px-2 md:px-0 hidden md:table-cell">Checksum</th>
+                  <th className="py-2.5 px-2 md:px-0 text-right">Sincronizado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                {tools.map((t) => (
+                  <tr key={t.name}>
+                    <td className="py-2.5 px-2 md:px-0 font-mono font-medium text-stone-900 dark:text-stone-100 max-w-xs truncate">
+                      {t.name}
+                    </td>
+                    <td className="py-2.5 px-2 md:px-0 font-mono text-stone-500 hidden sm:table-cell max-w-xs truncate text-[10px]">
+                      {t.vapiToolId}
+                    </td>
+                    <td className="py-2.5 px-2 md:px-0 font-mono text-stone-400 hidden md:table-cell max-w-xs truncate text-[10px]">
+                      {t.checksum}
+                    </td>
+                    <td className="py-2.5 px-2 md:px-0 text-right text-stone-500 text-[10px] md:text-xs whitespace-nowrap">
+                      {t.syncedAt ? new Date(t.syncedAt).toLocaleDateString("es-ES") : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
